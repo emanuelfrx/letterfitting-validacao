@@ -49,3 +49,12 @@ Em seguida, acesse a interface gerada pelo app (normalmente em `localhost:port`)
 - O script presume que `dados.csv` tem colunas nomeadas como no `colunas_iguais` e a coluna de filtro `manter_na_analise?`.
 - Caso as colunas não existam no CSV, elas são ignoradas na conversão numérica.
 - Regras podem ser ajustadas pelo usuário em `regras_raw` para outros pares de comparação.
+
+## Novas implementações
+
+- Inseri no README uma explicação completa linha-a-linha do fluxo do `app.py`.
+- Descrevi as regras tratadas atualmente (maiúsculas e minúsculas) e o mecanismo de ordenação/seleção.
+- Atualizei o passo de interface para explicar o histograma e as linhas de referência 0 (Tracy) e média real (vermelha tracejada).
+- Adicionei instruções de instalação e execução do app (`pip install ...`, `python app.py`).
+- Incluí detalhes de layout `marimo` (`mo.vstack`, `mo.hstack`), cálculo de diferenças e estatísticas exibidas.
+

@@ -19,14 +19,14 @@ class UIComponents:
         fig = px.bar(
             df_display,
             x='diff',
-            y='font_name',
+            y='nome_fonte',
             orientation='h',
             title=f"Desvio Individual por Fonte ({alvo} vs {ref})",
             # Escala de cor divergente: Verde (0) -> Vermelho (Erro Alto)
             color=df_display['diff'].abs(), 
             color_continuous_scale=px.colors.diverging.RdYlGn_r, # Reverso para Verde=Bom
             range_color=[0, df_display['diff'].abs().max()], # Define o limite da escala
-            labels={'diff': 'Desvio Teórico (un)', 'font_name': 'Fonte', 'color': 'Magnitude do Erro'}
+            labels={'diff': 'Desvio Teórico (un)', 'nome_fonte': 'Fonte', 'color': 'Magnitude do Erro'}
         )
 
         # 3. Interatividade e Estilização Avançada (Hover customizado)
@@ -81,7 +81,7 @@ class UIComponents:
             mo.md("### 🚨 Relatório de Ação: Prioridades de Ajuste"),
             mo.md("Abaixo estão as fontes que estão 'quebrando' a regra teórica com maior intensidade, ordenadas pelo tamanho do erro:"),
             mo.ui.table(
-                outliers[['font_name', 'diff']].head(12),
+                outliers[['nome_fonte', 'diff']].head(12),
                 label="Top 12 Outliers (Ajustes Prioritários)"
             )
         ]).style({

@@ -6,7 +6,7 @@ class AnalyticsSystem:
     def calcular_desvios(df, alvo, ref):
         """Calcula os desvios e identifica outliers contextualizados."""
         # 1. Limpeza e Cálculo de Diferença
-        data = df.dropna(subset=[alvo, ref, 'font_name']).copy()
+        data = df.dropna(subset=[alvo, ref, 'nome_fonte']).copy()
         data['diff'] = data[alvo] - data[ref]
         
         if data.empty:
