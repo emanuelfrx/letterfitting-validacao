@@ -22,47 +22,66 @@ def _():
     system = AnalyticsSystem()
     ui = UIComponents()
     df_analise = engine.get_analise_subset()
-    return df_analise, mo, system, ui
+    return df_analise, engine, mo, os, sys, system, ui
 
 
 @app.cell
 def _(mo):
     # 1. Definição do Header (Visual Y2K/Moderno)
     header = mo.md(
-        """
-        <div style='background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); 
-                    color: white; padding: 2rem; border-radius: 1.5rem; 
-                    text-align: center; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);'>
-            <h1 style='margin: 0; font-size: 2.2rem; letter-spacing: -1px;'>Specimen Builder <span style='font-weight: 200;'>PRO</span></h1>
-            <p style='margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px;'>
-                Validação Estatística • Método Tracy
-            </p>
-        </div>
-        """
-    )
+    """
+    <div style='background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); 
+                color: white; padding: 2rem; border-radius: 1.5rem; margin: 0.5rem 0 0 0; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);'>
+        <h1 style='margin: 0; font-size: 2.2rem; letter-spacing: -1px; font-weight: 800; color: white'>Validação Estatistica </h1>
+        <p style='margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px;'>
+            Outiliers• Método Tracy
+        </p>
+    </div>
+    """
+)
 
     regras_raw = [
-        ('Be', 'He', "B esquerdo = H esquerdo"), ('Ce', 'Oe', "C esquerdo = O esquerdo"),
-        ('De', 'He', "D esquerdo = H esquerdo"), ('Dd', 'Od', "D direito = O direito"),
-        ('Ee', 'He', "E esquerdo = H esquerdo"), ('Fe', 'He', "F esquerdo = H esquerdo"),
-        ('Ge', 'Oe', "G esquerdo = O esquerdo"), ('Ie', 'He', "I esquerdo = H esquerdo"),
-        ('Id', 'He', "I direito = H esquerdo"), ('Ke', 'He', "K esquerdo = H esquerdo"),
-        ('Le', 'He', "L esquerdo = H esquerdo"), ('Me', 'He', "M esquerdo = H esquerdo"),
-        ('Md', 'He', "M direito = H esquerdo"), ('Ne', 'He', "N esquerdo = H esquerdo"),
-        ('Nd', 'He', "N direito = H esquerdo"), ('Pe', 'He', "P esquerdo = H esquerdo"),
-        ('Qe', 'Oe', "Q esquerdo = O esquerdo"), ('Qd', 'Od', "Q direito = O direito"),
-        ('Re', 'He', "R esquerdo = H esquerdo"), ('Ue', 'He', "U esquerdo = H esquerdo"),
-        ('bd', 'nd', "b direito = n direito"), ('ce', 'oe', "c esquerdo = o esquerdo"),
-        ('de', 'oe', "d esquerdo = o esquerdo"), ('dd', 'nd', "d direito = n direito"),
-        ('ee', 'oe', "e esquerdo = o esquerdo"), ('ge', 'oe', "g esquerdo = o esquerdo"),
-        ('hd', 'nd', "h direito = n direito"), ('id', 'nd', "i direito = n direito"),
-        ('je', 'ne', "j esquerdo = n esquerdo"), ('jd', 'nd', "j direito = n direito"),
-        ('ke', 'ne', "k esquerdo = n esquerdo"), ('le', 'ne', "l esquerdo = n esquerdo"),
-        ('ld', 'nd', "l direito = n direito"), ('me', 'ne', "m esquerdo = n esquerdo"),
-        ('md', 'nd', "m direito = n direito"), ('pd', 'nd', "p direito = n direito"),
-        ('qe', 'oe', "q esquerdo = o esquerdo"), ('qd', 'od', "q direito = o direito"),
-        ('re', 'ne', "r esquerdo = n esquerdo"), ('ue', 'ne', "u esquerdo = n esquerdo"),
-        ('ud', 'nd', "u direito = n direito")
+        # --- MAIÚSCULAS ---
+        ('Be', 'He', "B esquerdo = H esquerdo"), 
+        ('Ce', 'Oe', "C esquerdo = O esquerdo"),
+        ('De', 'He', "D esquerdo = H esquerdo"), 
+        ('Dd', 'Od', "D direito = O direito"),
+        ('Ee', 'He', "E esquerdo = H esquerdo"), 
+        ('Fe', 'He', "F esquerdo = H esquerdo"),
+        ('Ge', 'Oe', "G esquerdo = O esquerdo"), 
+        ('Ie', 'He', "I esquerdo = H esquerdo"),
+        ('Id', 'He', "I direito = H esquerdo"), 
+        ('Jd', 'Hd', "J direito = H direito"), 
+        ('Ke', 'He', "K esquerdo = H esquerdo"),
+        ('Le', 'He', "L esquerdo = H esquerdo"), 
+        ('Md', 'Hd', "M direito = H direito"), 
+        ('Pe', 'He', "P esquerdo = H esquerdo"),
+        ('Pd', 'Od', "P direito = O direito"), 
+        ('Qe', 'Oe', "Q esquerdo = O esquerdo"), 
+        ('Qd', 'Od', "Q direito = O direito"),
+        ('Re', 'He', "R esquerdo = H esquerdo"), 
+        ('Ue', 'He', "U esquerdo = H esquerdo"),
+
+        # --- MINÚSCULAS ---
+        ('be', 'ne', "b esquerdo = n esquerdo"), 
+        ('bd', 'oe', "b direito = o direito"),   
+        ('ce', 'oe', "c esquerdo = o esquerdo"),
+        ('de', 'oe', "d esquerdo = o esquerdo"), 
+        ('dd', 'ne', "d direito = n esquerdo"), 
+        ('ee', 'oe', "e esquerdo = o esquerdo"),
+        ('id', 'ne', "i direito = n esquerdo"), 
+        ('jd', 'ne', "j direito = n esquerdo"), 
+        ('je', 'ne', "j esquerdo = n esquerdo"), 
+        ('ke', 'ne', "k esquerdo = n esquerdo"), 
+        ('ld', 'ne', "l direito = n esquerdo"), 
+        ('md', 'ne', "m direito = n esquerdo"), 
+        ('me', 'ne', "m esquerdo = n esquerdo"), 
+        ('pd', 'od', "p direito = o direito"),  
+        ('qe', 'oe', "q esquerdo = o esquerdo"), 
+        ('qd', 'ne', "q direito = n esquerdo"), 
+        ('re', 'ne', "r esquerdo = n esquerdo"),
+        ('ue', 'nd', "u esquerdo = n direito"),  
+        ('ud', 'nd', "u direito = n direito")  
     ]
 
     dropdown = mo.ui.dropdown(
@@ -70,14 +89,13 @@ def _(mo):
         label="🎯 Selecione a Regra para Analisar",
         value=None
     )
-    dropdown, header
-    return dropdown, header
+    
+    return dropdown, header, regras_raw
 
 
 @app.cell
 def _(df_analise, dropdown, header, mo, system, ui):
     # 2. Lógica de Renderização Unificada
-    # Se nada estiver selecionado, mostra o Header e o Dropdown com um aviso
     if dropdown.value is None:
         render = mo.vstack([
             header,
@@ -87,9 +105,11 @@ def _(df_analise, dropdown, header, mo, system, ui):
     else:
         alvo, ref = dropdown.value
         df_plot, outliers = system.calcular_desvios(df_analise, alvo, ref)
+        
+        # O cálculo da Média Aritmética Simples ocorre aqui e é passado adiante
         media = df_plot['diff'].mean()
 
-        # Chama o componente visual estilizado
+        # Renderização do Dashboard com Gráfico de Dispersão e Barras
         resultado = ui.render_infografico(alvo, ref, df_plot, outliers, media)
 
         render = mo.vstack([
@@ -100,7 +120,7 @@ def _(df_analise, dropdown, header, mo, system, ui):
         ])
 
     render
-    return
+    return alvo, df_plot, media, outliers, ref, render
 
 
 if __name__ == "__main__":
