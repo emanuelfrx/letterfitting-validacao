@@ -3,7 +3,6 @@ import marimo
 __generated_with = "0.21.1"
 app = marimo.App(width="medium")
 
-
 @app.cell
 def _():
     import marimo as mo
@@ -34,11 +33,11 @@ def _(mo):
                 color: white; padding: 2rem; border-radius: 1.5rem; margin: 0.5rem 0 0 0; margin-bottom: 2rem; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);'>
         <h1 style='margin: 0; font-size: 2.2rem; letter-spacing: -1px; font-weight: 800; color: white'>Validação Estatistica </h1>
         <p style='margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px;'>
-            Outiliers• Método Tracy
+            Outliers • Método Tracy
         </p>
     </div>
     """
-)
+    )
 
     regras_raw = [
         # --- MAIÚSCULAS ---
@@ -50,7 +49,7 @@ def _(mo):
         ('Fe', 'He', "F esquerdo = H esquerdo"),
         ('Ge', 'Oe', "G esquerdo = O esquerdo"), 
         ('Ie', 'He', "I esquerdo = H esquerdo"),
-        ('Id', 'He', "I direito = H esquerdo"), 
+        ('Id', 'Hd', "I direito = H direito"), 
         ('Jd', 'Hd', "J direito = H direito"), 
         ('Ke', 'He', "K esquerdo = H esquerdo"),
         ('Le', 'He', "L esquerdo = H esquerdo"), 
@@ -104,13 +103,13 @@ def _(df_analise, dropdown, header, mo, system, ui):
         ])
     else:
         alvo, ref = dropdown.value
-        df_plot, outliers = system.calcular_desvios(df_analise, alvo, ref)
         
-        # O cálculo da Média Aritmética Simples ocorre aqui e é passado adiante
+        # Recebendo os dados de regressão (m, c)
+        df_plot, outliers, m, c = system.calcular_desvios(df_analise, alvo, ref)
         media = df_plot['diff'].mean()
 
-        # Renderização do Dashboard com Gráfico de Dispersão e Barras
-        resultado = ui.render_infografico(alvo, ref, df_plot, outliers, media)
+        # Renderização do Dashboard com os novos parâmetros
+        resultado = ui.render_infografico(alvo, ref, df_plot, outliers, media, m, c)
 
         render = mo.vstack([
             header,
