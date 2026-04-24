@@ -31,7 +31,7 @@ Exemplo:
 
 ```bash
 pip install pandas plotly marimo
-python app.py
+marimo run app.py
 ```
 
 Em seguida, acesse a interface gerada pelo app (normalmente em `localhost:port`) e selecione uma regra.
