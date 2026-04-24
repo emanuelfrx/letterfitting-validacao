@@ -13,10 +13,14 @@ class UIComponents:
         idx_menor = df_plot['diff'].idxmin()
         fonte_menor = df_plot.loc[idx_menor, 'nome_fonte']
         val_menor = df_plot.loc[idx_menor, 'diff']
+        n_fontes = len(df_plot);
 
         # 2. Preparação para a Visão Micro e Tabela (Sincronizados)
         df_sorted_bar = df_plot.sort_values(by='diff', key=abs, ascending=True)
-        df_display = df_sorted_bar.tail(150) if len(df_sorted_bar) > 150 else df_sorted_bar
+        df_display = df_sorted_bar[df_sorted_bar['diff'] != 0]
+
+        df_table_completa = df_sorted_bar[['nome_fonte', alvo, ref, 'diff']].iloc[::-1].copy()
+        df_table_completa.columns = ['Fonte', f'{alvo} (Real)', f'{ref} (Tracy)', 'Desvio']
 
         # 3. Curva em S (Dispersão Ordenada)
         df_scatter = df_plot.sort_values(by='diff')
@@ -94,6 +98,7 @@ class UIComponents:
             mo.md(f"Análise de coerência baseada na Regra de Walter Tracy").center(),
             
             mo.hstack([
+                mo.stat(value=str(n_fontes), label="Fontes Analisadas"),
                 mo.stat(value=f"{media:.2f}", label="Média Aritmética"),
                 mo.stat(value=f"{val_maior:.2f}", label="Maior Desvio", caption=fonte_maior),
                 mo.stat(value=f"{val_menor:.2f}", label="Menor Desvio", caption=fonte_menor),
@@ -122,7 +127,7 @@ class UIComponents:
 
             mo.md("---").style({"margin": "2rem 0", "opacity": "0.3"}),
             mo.md("### 🗃️ Dados Tipográficos Extraídos (Sincronizados)"),
-            mo.ui.table(df_table, pagination=True).style({
+            mo.ui.table(df_table_completa, pagination=True).style({
                 "background-color": "#ffffff", "border-top": "4px solid #8A1E1E", "padding": "10px"
             })
             
