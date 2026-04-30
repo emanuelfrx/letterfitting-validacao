@@ -20,8 +20,11 @@ def _():
     engine = DataEngine("data/dados.csv")
     system = AnalyticsSystem()
     ui = UIComponents()
+    
     df_analise = engine.get_analise_subset()
-    return df_analise, engine, mo, os, sys, system, ui
+    df_ff = engine.get_fontforge_data()
+    
+    return df_analise, df_ff, engine, mo, os, sys, system, ui
 
 
 @app.cell
@@ -93,7 +96,7 @@ def _(mo):
 
 
 @app.cell
-def _(df_analise, dropdown, header, mo, system, ui):
+def _(df_analise, df_ff, dropdown, header, mo, system, ui):
     # 2. Lógica de Renderização Unificada
     if dropdown.value is None:
         render = mo.vstack([
@@ -108,8 +111,8 @@ def _(df_analise, dropdown, header, mo, system, ui):
         df_plot, outliers, m, c = system.calcular_desvios(df_analise, alvo, ref)
         media = df_plot['diff'].mean()
 
-        # Renderização do Dashboard com os novos parâmetros
-        resultado = ui.render_infografico(alvo, ref, df_plot, outliers, media, m, c)
+        # Renderização do Dashboard com o df_ff adicionado nos parâmetros
+        resultado = ui.render_infografico(alvo, ref, df_plot, outliers, media, m, c, df_ff)
 
         render = mo.vstack([
             header,
