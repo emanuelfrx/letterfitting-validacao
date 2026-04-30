@@ -26,3 +26,11 @@ class DataEngine:
         if 'manter_na_analise?' in self.df.columns:
             return self.df[self.df['manter_na_analise?'] == 'Sim'].copy()
         return self.df.copy()
+
+    def get_fontforge_data(self) -> pd.DataFrame:
+        """Lê exclusivamente os dados extraídos pelo FontForge para visualização na tabela."""
+        try:
+            return pd.read_csv("data/metricas_fontes_lote.csv")
+        except Exception as e:
+            print(f"Aviso - Arquivo do FontForge não encontrado ou erro ao carregar: {e}")
+            return pd.DataFrame()
