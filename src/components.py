@@ -69,7 +69,6 @@ class UIComponents:
         )
 
         # 4. Histograma de Frequência
-        # Diminuído nbins para 10 para reduzir os intervalos.
         fig_hist = px.histogram(
             df_plot, x='diff', nbins=80,
             title="Distribuição dos Desvios",
@@ -109,7 +108,6 @@ class UIComponents:
                 mo.stat(value=f"{media:.4f}", label="Média Aritmética"),
                 mo.stat(value=f"{val_maior:.2f}", label="Maior Desvio", caption=fonte_maior),
                 mo.stat(value=f"{val_menor:.2f}", label="Menor Desvio", caption=fonte_menor),
-                # Exibição com 4 casas decimais para refletir a precisão da regressão
                 mo.stat(
                     value=f"{alvo} = {m:.4f} · {ref} {c:+.4f}", 
                     label="Fórmula de Regressão",

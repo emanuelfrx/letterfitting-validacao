@@ -87,9 +87,9 @@ def _(mo):
     ]
 
     dropdown = mo.ui.dropdown(
-        options={desc: (a, r) for a, r, desc in sorted(regras_raw, key=lambda x: (x[0].islower(), x[2]))},
-        label="🎯 Selecione a Regra para Analisar",
-        value=None
+    options={desc: (a, r) for a, r, desc in sorted(regras_raw, key=lambda x: (x[0].islower(), x[2]))},
+    label="🎯 Selecione a Regra para Analisar",
+    value=None
     )
     
     return dropdown, header, regras_raw
