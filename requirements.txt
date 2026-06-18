@@ -1,0 +1,7 @@
+marimo
+jupyter
+notebook
+ipykernel
+numpy
+pandas
+plotly
