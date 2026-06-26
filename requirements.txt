@@ -5,3 +5,5 @@ ipykernel
 numpy
 pandas
 plotly
+seaborn
+matplotlib

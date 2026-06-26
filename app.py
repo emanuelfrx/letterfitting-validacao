@@ -149,14 +149,17 @@ def _():
 @app.cell
 def _(mo, result):
     from src.components import (
-        chart_histogram,
+        chart_boxplot,
+        chart_violinplot,
         chart_scatter,
     )
 
-   # O vstack empilha verticalmente, dando espaço total para cada um
     mo.vstack([
-        chart_histogram(result),
-        chart_scatter(result)
+        mo.hstack([
+            chart_boxplot(result),
+            chart_violinplot(result),
+        ]),
+        chart_scatter(result),
     ])
 
 

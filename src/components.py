@@ -2,18 +2,16 @@
 #  components.py  — Peças de UI reutilizáveis (sem lógica)
 # ─────────────────────────────────────────────────────────────
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 import marimo as mo
 
-
 from src.analytics import AnalysisResult
-
 
 # ══════════════════════════════════════════════════════════════
 #  SISTEMA DE DESIGN
 #  Paleta restrita: 1 accent + slate + semântica de dados
 # ══════════════════════════════════════════════════════════════
-
 
 # Cores base
 _INK       = "#111827"
@@ -33,11 +31,9 @@ _NEG       = "#DC2626"
 _ZERO      = "#64748B"
 _WARN      = "#D97706"   # amber   — média / outlier leve
 
-
 # Tipografia
 _FONT      = "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif"
 _MONO      = "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace"
-
 
 # Escala tipográfica
 _T_XS  = "0.75rem"    # 11.5px — captions, labels superiores
@@ -46,19 +42,14 @@ _T_MD  = "1rem"  # 15px   — body padrão
 _T_LG  = "1.25rem"  # 18px   — subtítulos de seção
 _T_XL  = "2rem"   # 28px   — valores KPI
 
-
-
 # ══════════════════════════════════════════════════════════════
 #  UTILITÁRIOS INTERNOS
 # ══════════════════════════════════════════════════════════════
-
 
 def _dot(color: str, size: int = 8) -> str:
     """Indicador circular de cor — substitui emoji como ícone."""
     return (f"<span style='display:inline-block;width:{size}px;height:{size}px;"
             f"border-radius:50%;background:{color};flex-shrink:0'></span>")
-
-
 
 
 def _chip(text: str, color: str = _ACCENT, bg: str = _ACCENT_BG) -> str:
@@ -68,8 +59,6 @@ def _chip(text: str, color: str = _ACCENT, bg: str = _ACCENT_BG) -> str:
             f"background:{bg};border:1px solid {color}22;"
             f"border-radius:999px;padding:.2rem .65rem;"
             f"letter-spacing:.04em;white-space:nowrap'>{text}</span>")
-
-
 
 
 def _kpi(value: str, label: str, caption: str = "",
@@ -101,12 +90,9 @@ def _kpi(value: str, label: str, caption: str = "",
 </div>"""
 
 
-
-
 # ══════════════════════════════════════════════════════════════
 #  PLOTLY — TEMA COMPARTILHADO
 # ══════════════════════════════════════════════════════════════
-
 
 def _layout_base(title_text: str, height: int) -> dict:
     return dict(
@@ -120,25 +106,20 @@ def _layout_base(title_text: str, height: int) -> dict:
             x=0,
             xanchor="left",
         ),
-
         paper_bgcolor="#FFFFFF",
         plot_bgcolor="#FFFFFF",
-
         height=height,
-
         margin=dict(
             l=20,
             r=20,
             t=60,
             b=50,
         ),
-
         font=dict(
             family=_FONT,
             color=_BODY,
             size=12,
         ),
-
         hoverlabel=dict(
             bgcolor="#111827",
             font_color="white",
@@ -146,7 +127,6 @@ def _layout_base(title_text: str, height: int) -> dict:
             font_family=_FONT,
             font_size=12,
         ),
-
         showlegend=False,
     )
 
@@ -159,24 +139,18 @@ def _axis_x(title: str = "", show_labels: bool = True) -> dict:
                 color=_BODY,
             ),
         ),
-
         tickfont=dict(
             color=_MUTED,
             family=_FONT,
             size=11,
         ),
-
         gridcolor="#E2E8F0",
         gridwidth=1,
-
         linecolor="#CBD5E1",
         linewidth=1,
-
         zeroline=False,
-
         showticklabels=show_labels,
     )
-
 
 
 def _axis_y(title: str = "") -> dict:
@@ -188,29 +162,22 @@ def _axis_y(title: str = "") -> dict:
                 color=_BODY,
             ),
         ),
-
         tickfont=dict(
             color=_MUTED,
             family=_FONT,
             size=11,
         ),
-
         gridcolor="#E2E8F0",
         gridwidth=1,
-
         linecolor="#CBD5E1",
         linewidth=1,
-
         zeroline=False,
     )
-
-
 
 
 # ══════════════════════════════════════════════════════════════
 #  COMPONENTES PÚBLICOS
 # ══════════════════════════════════════════════════════════════
-
 
 def header_banner() -> mo.Html:
     return mo.md(f"""
@@ -244,14 +211,11 @@ def header_banner() -> mo.Html:
 </div>""")
 
 
-
-
 def kpi_cards(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
     """Faixa de 5 KPIs com escala tipográfica coerente."""
     n_out = len(result.outliers)
     pct   = f"{n_out / result.n_fontes * 100:.1f}%" if result.n_fontes else "—"
     formula = f"{alvo} = {result.m:.4f}·{ref} {result.c:+.4f}"
-
 
     cards = "".join([
         _kpi(str(result.n_fontes),         "Fontes analisadas",  color=_ACCENT),
@@ -265,7 +229,6 @@ def kpi_cards(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
              caption="Ajuste via np.polyfit", color=_ZERO, mono=True),
     ])
 
-
     return mo.md(f"""
 <div style='
     display:flex; flex-wrap:wrap; gap:.75rem;
@@ -275,11 +238,8 @@ def kpi_cards(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
 '>{cards}</div>""")
 
 
-
 def chart_scatter(result: AnalysisResult) -> mo.Html:
-
     df = result.df_plot.sort_values(by='diff').reset_index(drop=True)
-
     point_colors = []
 
     for v in df["diff"]:
@@ -331,121 +291,240 @@ def chart_scatter(result: AnalysisResult) -> mo.Html:
     return mo.as_html(fig)
 
 
-def chart_histogram(result: AnalysisResult) -> mo.Html:
-    df = result.df_plot
-    mean = result.media
-    
-    fig = go.Figure()
+def chart_boxplot(result: AnalysisResult) -> mo.Html:
+    """Boxplot de alta fidelidade com estatísticas detalhadas e outliers destacados."""
+    df = result.df_plot.copy()
+    df["diff"] = pd.to_numeric(df["diff"], errors="coerce").astype("float64")
+    df = df.dropna(subset=["diff"])
+    s = df["diff"]
 
-    # O bin_size de 0.5 com start de -20.25 coloca o 0 exatamente no centro de um bin
-    fig.add_trace(go.Histogram(
-        x=df['diff'],
-        xbins=dict(
-            start=-20.25, 
-            size=0.5
-        ),
-        marker_color='#3B82F6',
-        marker_line_color='#FFFFFF',
-        marker_line_width=1,
-        opacity=0.9,
-        hovertemplate="Desvio Central: %{x}<br>Qtd. de Fontes: %{y}<extra></extra>"
+    # 1. Cálculos Tukey
+    q1, q2, q3 = np.percentile(s, [25, 50, 75])
+    iqr = q3 - q1
+    # Proteção contra desvio zero
+    spread = iqr if iqr > 1e-9 else float(s.std())
+    fence_lo = q1 - 1.5 * spread
+    fence_hi = q3 + 1.5 * spread
+    
+    outliers_mask = (s < fence_lo) | (s > fence_hi)
+    df_out  = df[outliers_mask].copy()
+    n_out   = int(outliers_mask.sum())
+
+    # 2. Explicação Detalhada (Markdown)
+    explicacao = mo.md(f"""
+<div style='background:{_BG}; border:1px solid {_BORDER}; border-left:4px solid {_ACCENT}; border-radius:.75rem; padding:1.25rem; margin-bottom:1.5rem;'>
+    <h4 style='margin:0 0 0.5rem; color:{_INK}; font-size:1rem;'>Diagrama de Dispersão Estatística (Tukey)</h4>
+    <p style='margin:0 0 1rem; color:{_BODY}; font-size:{_T_SM}; line-height:1.5;'>
+        Este gráfico exibe a distribuição central de 50% dos dados (IQR) no retângulo azul. 
+        As hastes representam os limites de normalidade ({fence_lo:+.2f} a {fence_hi:+.2f}). 
+        Pontos fora desses limites são <b>outliers estatísticos</b> ({n_out} identificados), 
+        destacados em vermelho, que indicam fontes que se desviam significativamente do comportamento esperado.
+    </p>
+    <div style='display:flex; gap:1.5rem; font-family:{_MONO}; font-size:{_T_XS}; color:{_MUTED};'>
+        <span>Q1: <strong>{q1:+.2f}</strong></span>
+        <span>Mediana: <strong>{q2:+.2f}</strong></span>
+        <span>Q3: <strong>{q3:+.2f}</strong></span>
+        <span>IQR: <strong>{iqr:.2f}</strong></span>
+    </div>
+</div>""")
+
+    # 3. Gráfico
+    fig = go.Figure()
+    rng = np.random.default_rng(42)
+
+    # Trace 1: Boxplot nativo posicionado no eixo central (sem os pontos, mostrando apenas a caixa e bigodes)
+    fig.add_trace(go.Box(
+        x=[0] * len(s),
+        y=s,
+        name="",
+        boxpoints=False, 
+        fillcolor=_ACCENT_BG,
+        line=dict(color=_ACCENT, width=1.5),
+        width=0.4,
+        showlegend=False,
+        hovertemplate=(
+            f"<b>Resumo Estatístico</b><br>"
+            f"Q3: {q3:+.3f}<br>"
+            f"Mediana: {q2:+.3f}<br>"
+            f"Q1: {q1:+.3f}<br>"
+            f"IQR: {iqr:.3f}<br>"
+            f"Limites: [{fence_lo:+.3f}, {fence_hi:+.3f}]<extra></extra>"
+        )
     ))
 
-    # Adiciona a linha da média
-    fig.add_vline(x=mean, line_dash="solid", line_color="orange", 
-                  annotation_text=f"μ={mean:.2f}")
+    # Trace 2: Pontos de Outliers em Vermelho (Jitter p/ nao sobrepor)
+    if n_out > 0:
+        fig.add_trace(go.Scatter(
+            x=rng.uniform(-0.08, 0.08, size=n_out),
+            y=df_out["diff"],
+            mode="markers",
+            marker=dict(
+                color=_NEG,
+                size=7,
+                opacity=0.9,
+                line=dict(color="white", width=1)
+            ),
+            text=df_out["nome_fonte"].values,
+            hovertemplate="<b>%{text}</b><br>Desvio (Outlier): %{y:+.3f}<extra></extra>",
+            showlegend=False,
+            hoverinfo="text+y"
+        ))
 
-    # Centraliza o eixo X para ter simetria visual
-    # Ajuste o range [-20, 20] conforme a necessidade do seu zoom
-    fig.update_layout(
-        title="Distribuição dos Desvios",
-        xaxis=dict(
-            title="Desvio",
-            range=[-20, 20], 
-            dtick=2 # Mostra marcações a cada 2.5 unidades para limpar o gráfico
-        ),
-        yaxis_title="Qtd. de fontes",
-        bargap=0.05,
-        template="plotly_white"
-    )
-
-    return mo.ui.plotly(fig)
-    """Distribuição dos desvios com foco centralizado e barras robustas."""
-    df   = result.df_plot
-    mean = result.media
-    
-    # 1. Definimos um intervalo de zoom agressivo para evitar o achatamento
-    # Isso foca no "miolo" da distribuição (ex: -10 a 10)
-    # Ajuste o range conforme a necessidade dos seus dados reais
-    zoom_range = [-10, 20]
-    
-    fig = go.Figure()
-
-    fig.add_trace(go.Histogram(
-        x=df['diff'], 
-        # Aumentamos o tamanho do bin para agrupar melhor os dados
-        xbins=dict(start=-0, end=10, size=0.5), 
-        marker_color=_ACCENT,
-        marker_line_color=_SURFACE,
-        marker_line_width=1, # Adiciona uma borda fina para definir a barra
-        opacity=0.9,
-        hovertemplate="Desvio: %{x:.2f}<br>Fontes: %{y}<extra></extra>",
-    ))
-
-    # 2. Linha da média para dar contexto
-    fig.add_vline(x=mean, line_color=_WARN, line_width=2)
-
-    layout = _layout_base("Distribuição dos Desvios ", 280)
+    # Layout
+    layout = _layout_base(f"Distribuição e Dispersão ({len(s)} fontes)", 500)
     layout.update(
-        bargap=0.05, # Espaço quase nulo entre barras deixa elas mais largas
-        xaxis=dict(
-            title="Desvio",
-            range=zoom_range, # Força o zoom no centro
-            gridcolor=_BORDER_SM
-        ),
-        yaxis=_axis_y("Qtd. de fontes"),
+        xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.5, 0.5]),
+        yaxis=dict(title="Desvio do Ideal Tracy", gridcolor=_BORDER_SM),
+        hovermode="closest"
     )
     fig.update_layout(**layout)
-    return mo.as_html(fig)
-    df = result.df_plot
-    mean = result.media
-    std = df["diff"].std()
-
-    fig = go.Figure()
-
-    # Adicionar sombreamento da área central (zona de 1 sigma)
-    fig.add_vrect(
-        x0=mean - std, x1=mean + std,
-        fillcolor="rgba(37, 99, 235, 0.1)", line_width=0, layer="below"
+    
+    # Adicionando linha tracejada de referência para Y=0
+    fig.add_hline(
+        y=0, line_dash="dash", line_color=_MUTED, line_width=1.5,
+        annotation_text="Ideal Tracy (0)",
+        annotation_font_color=_MUTED,
+        annotation_font_size=10,
+        annotation_position="bottom right",
     )
 
-    # Histograma
-    fig.add_trace(go.Histogram(
-        x=df["diff"],
-        marker_color=_ACCENT,
-        opacity=0.8,
-        # Deixe o Plotly decidir o melhor número de bins ou defina um tamanho fixo
-        xbins=dict(size=0.5) 
+    return mo.vstack([explicacao, mo.as_html(fig)])
+
+
+def chart_violinplot(result: AnalysisResult) -> mo.Html:
+    """Violin plot com visual de outliers unificado (vermelho) igual ao boxplot, sem tabelas."""
+    df = result.df_plot.copy()
+    df["diff"] = pd.to_numeric(df["diff"], errors="coerce").astype("float64")
+    df = df.dropna(subset=["diff"])
+    s = df["diff"]
+
+    # ── Cálculo Tukey ───────────────────────────────────────────
+    q1       = float(np.percentile(s, 25))
+    q2       = float(np.percentile(s, 50))
+    q3       = float(np.percentile(s, 75))
+    iqr      = q3 - q1
+    spread   = iqr if iqr > 1e-9 else float(s.std())
+    fence_lo = q1 - 1.5 * spread
+    fence_hi = q3 + 1.5 * spread
+    mean_val = float(s.mean())
+    std_val  = float(s.std())
+    pct_zero = int((s == 0).sum())
+    n_total  = len(s)
+
+    outliers_mask = (s < fence_lo) | (s > fence_hi)
+    df_out = df[outliers_mask].copy()
+    n_out  = int(outliers_mask.sum())
+
+    # Bandwidth explícito: Scott's rule aplicada ao std real
+    bw = 1.06 * std_val * (n_total ** -0.2) if std_val > 1e-9 else 1.0
+
+    concentracao_txt = (
+        f"O pico central em y=0 reflete que {pct_zero}/{n_total} fontes seguem o padrão exato."
+        if pct_zero > n_total * 0.3
+        else f"A distribuição apresenta variabilidade real (std={std_val:.3f}) com {n_out} outlier{'s' if n_out!=1 else ''} identificado{'s' if n_out!=1 else ''}."
+    )
+
+    explicacao = mo.md(f"""
+<div style='
+    background:{_BG}; border:1px solid {_BORDER};
+    border-left:4px solid {_ZERO};
+    border-radius:.75rem; padding:1rem 1.25rem;
+    margin-bottom:1rem; font-family:{_FONT};
+'>
+    <div style='font-size:{_T_XS};font-weight:700;color:{_ZERO};
+        text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem'>
+        Por que Violin Plot?
+    </div>
+    <p style='margin:0 0 .5rem;font-size:{_T_SM};color:{_BODY};line-height:1.6'>
+        O violin combina a <strong>KDE (kernel density estimation)</strong> com boxplot
+        interno. A largura em cada ponto indica frequência de fontes com aquele desvio.
+        {concentracao_txt} Os outliers ({n_out}) são destacados em vermelho, mantendo consistência visual com o boxplot.
+    </p>
+    <div style='display:flex;flex-wrap:wrap;gap:.5rem;font-size:{_T_XS};
+        font-family:{_MONO};color:{_MUTED}'>
+        <span>Média = <strong style='color:{_INK}'>{mean_val:+.3f}</strong></span>
+        <span>·</span>
+        <span>Std = <strong style='color:{_INK}'>{std_val:.3f}</strong></span>
+        <span>·</span>
+        <span>IQR = <strong style='color:{_INK}'>{iqr:.3f}</strong></span>
+        <span>·</span>
+        <span>bw = <strong style='color:{_INK}'>{bw:.3f}</strong></span>
+        <span>·</span>
+        <span>Outliers = <strong style='color:{_NEG}'>{n_out}/{n_total}</strong></span>
+    </div>
+</div>""")
+
+    # ── Gráfico ───────────────────────────────────────
+    fig = go.Figure()
+    rng = np.random.default_rng(42)
+
+    # Trace 1: Violin nativo posicionado no eixo central (sem outliers nativos para usar o custom)
+    fig.add_trace(go.Violin(
+        x=[0] * len(s),
+        y=s.values,
+        box_visible=True,
+        meanline_visible=True,
+        points=False, # Removido para usar o scatter e manter a consistência visual com o boxplot
+        bandwidth=bw,
+        line_color=_ACCENT,
+        fillcolor=_ACCENT_BG,
+        opacity=0.85,
+        box=dict(
+            visible=True,
+            fillcolor=_ACCENT,
+            line=dict(color=_ACCENT, width=1.5),
+        ),
+        meanline=dict(visible=True, color=_WARN, width=2),
+        hovertemplate=(
+            f"<b>Resumo Densidade</b><br>"
+            f"Média: {mean_val:+.3f}<br>"
+            f"Q3: {q3:+.3f}<br>"
+            f"Mediana: {q2:+.3f}<br>"
+            f"Q1: {q1:+.3f}<br>"
+            f"IQR: {iqr:.3f}<br>"
+            f"Limites: [{fence_lo:+.3f}, {fence_hi:+.3f}]<extra></extra>"
+        ),
+        showlegend=False,
+        name="",
     ))
 
-    # Apenas a linha da média com anotação clara
-    fig.add_vline(x=mean, line_color=_WARN, line_width=2, 
-                  annotation_text=f"μ={mean:.2f}", annotation_position="top right")
+    # Trace 2: Pontos de Outliers em Vermelho (Jitter) para alinhar visualmente com o Boxplot
+    if n_out > 0:
+        fig.add_trace(go.Scatter(
+            x=rng.uniform(-0.08, 0.08, size=n_out),
+            y=df_out["diff"],
+            mode="markers",
+            marker=dict(
+                color=_NEG,
+                size=7,
+                opacity=0.9,
+                line=dict(color="white", width=1)
+            ),
+            text=df_out["nome_fonte"].values,
+            hovertemplate="<b>%{text}</b><br>Desvio (Outlier): %{y:+.3f}<extra></extra>",
+            showlegend=False,
+            hoverinfo="text+y"
+        ))
 
-    # Linhas de sigma sem texto, apenas como referência visual
-    fig.add_vline(x=mean + std, line_dash="dash", line_color=_MUTED, line_width=1)
-    fig.add_vline(x=mean - std, line_dash="dash", line_color=_MUTED, line_width=1)
-
-    # Configuração de layout limpa
-    fig.update_layout(
-        template="plotly_white",
-        margin=dict(l=20, r=20, t=40, b=20),
-        xaxis_title="Desvio da Regra",
-        yaxis_title="Fontes",
-        bargap=0.05
+    fig.add_hline(
+        y=0, line_dash="longdash", line_color=_ZERO, line_width=1.5,
+        annotation_text="Padrão Tracy (y=0)",
+        annotation_font_color=_ZERO,
+        annotation_font_size=10,
+        annotation_position="top right",
     )
 
-    return mo.as_html(fig)
+    layout = _layout_base("Densidade de Frequência da Base de Dados Tipográfica", 520)
+    layout.update(
+        yaxis=_axis_y("Desvio em relação ao padrão Tracy"),
+        xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.5, 0.5]),
+        showlegend=False,
+        hovermode="closest"
+    )
+    fig.update_layout(**layout)
+
+    # Removida a tabela de auditoria conforme solicitado, para manter a tela limpa e igual ao boxplot.
+    return mo.vstack([explicacao, mo.as_html(fig)])
 
 
 def chart_bar_detail(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
@@ -455,13 +534,10 @@ def chart_bar_detail(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
           .pipe(lambda d: d[d['diff'] != 0])
           .reset_index(drop=True))
 
-
     abs_max = max(df['diff'].abs().max(), 0.001)
 
-
-    # Escala contínua de cor: verde (perto de zero) → vermelho (longe)
     def _bar_color(v: float) -> str:
-        t = abs(v) / abs_max  # 0 → 1
+        t = abs(v) / abs_max
         if t < 0.4:
             return _POS
         elif t < 0.72:
@@ -469,12 +545,9 @@ def chart_bar_detail(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
         else:
             return _NEG
 
-
     colors = [_bar_color(v) for v in df['diff']]
 
-
     fig = go.Figure()
-
 
     fig.add_trace(go.Bar(
         x=df['diff'], y=df['nome_fonte'],
@@ -490,8 +563,6 @@ def chart_bar_detail(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
         name="",
     ))
 
-
-    # Linha zero — referência Tracy
     fig.add_vline(
         x=0, line_color=_ZERO, line_width=1.5,
         annotation_text="Ideal Tracy",
@@ -500,8 +571,6 @@ def chart_bar_detail(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
         annotation_position="top right",
     )
 
-
-    # Linha da média
     fig.add_vline(
         x=result.media, line_color=_WARN, line_width=1,
         line_dash="dash",
@@ -510,7 +579,6 @@ def chart_bar_detail(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
         annotation_font_size=10,
         annotation_position="top left",
     )
-
 
     layout = _layout_base(
         f"Desvio Individual por Fonte  ·  {alvo}  vs  {ref}",
@@ -529,8 +597,6 @@ def chart_bar_detail(result: AnalysisResult, alvo: str, ref: str) -> mo.Html:
     return mo.as_html(fig)
 
 
-
-
 def table_typography(result: AnalysisResult, alvo: str, ref: str,
                      df_ff: pd.DataFrame) -> mo.Html:
     """Tabela de dados tipográficos com merge opcional do FontForge."""
@@ -540,7 +606,6 @@ def table_typography(result: AnalysisResult, alvo: str, ref: str,
           .iloc[::-1]
           .copy())
     df['ideal'] = df['ideal'].round(2)
-
 
     has_ff = (df_ff is not None and not df_ff.empty
               and 'nome_fonte' in df_ff.columns and alvo in df_ff.columns)
@@ -554,7 +619,6 @@ def table_typography(result: AnalysisResult, alvo: str, ref: str,
     else:
         df.columns = ['Fonte', f'{alvo} (Original)', f'{ref} (Referência)', 'Ideal Tracy']
 
-
     return mo.ui.table(df, pagination=True).style({
         "font-family": _FONT,
         "font-size": _T_SM,
@@ -563,8 +627,6 @@ def table_typography(result: AnalysisResult, alvo: str, ref: str,
         "border-radius": ".75rem",
         "overflow": "hidden",
     })
-
-
 
 
 def section_divider(num: str, title: str, subtitle: str = "") -> mo.Html:
@@ -585,8 +647,6 @@ def section_divider(num: str, title: str, subtitle: str = "") -> mo.Html:
     <h3 style='margin:0;font-size:{_T_LG};font-weight:600;color:{_INK}'>{title}</h3>
     {sub_html}
 </div>""")
-
-
 
 
 def empty_state(n_regras: int) -> mo.Html:
