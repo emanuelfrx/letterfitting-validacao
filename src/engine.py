@@ -11,7 +11,7 @@ class DataEngine:
             cols = [
                 'Be', 'He', 'Ce', 'Oe', 'Cd', 'Od', 'De', 'Dd', 'Ee', 'Fe', 'Ge', 'Ie', 'Id', 
                 'Jd', 'Hd', 'Ke', 'Le', 'Me', 'Md', 'Pe', 'Pd', 'Qe', 'Qd', 'Re', 'Ue',
-                'be', 'bd', 'ne', 'nd', 'ce', 'oe', 'de', 'dd', 'ee', 'id', 'je', 'jd', 
+                'be', 'bd', 'ne', 'nd', 'ce', 'oe', 'od','de', 'dd', 'ee', 'id', 'je', 'jd', 
                 'ke', 'le', 'ld', 'me', 'md', 'pd', 'qe', 'qd', 're', 'ue', 'ud'
             ]
             for col in cols:

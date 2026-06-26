@@ -301,79 +301,63 @@ def chart_boxplot(result: AnalysisResult) -> mo.Html:
     # 1. Cálculos Tukey
     q1, q2, q3 = np.percentile(s, [25, 50, 75])
     iqr = q3 - q1
-    # Proteção contra desvio zero
-    spread = iqr if iqr > 1e-9 else float(s.std())
-    fence_lo = q1 - 1.5 * spread
-    fence_hi = q3 + 1.5 * spread
-    
-    outliers_mask = (s < fence_lo) | (s > fence_hi)
-    df_out  = df[outliers_mask].copy()
-    n_out   = int(outliers_mask.sum())
+    fence_lo = q1 - 1.5 * iqr
+    fence_hi = q3 + 1.5 * iqr
 
     # 2. Explicação Detalhada (Markdown)
     explicacao = mo.md(f"""
 <div style='background:{_BG}; border:1px solid {_BORDER}; border-left:4px solid {_ACCENT}; border-radius:.75rem; padding:1.25rem; margin-bottom:1.5rem;'>
     <h4 style='margin:0 0 0.5rem; color:{_INK}; font-size:1rem;'>Diagrama de Dispersão Estatística (Tukey)</h4>
-    <p style='margin:0 0 1rem; color:{_BODY}; font-size:{_T_SM}; line-height:1.5;'>
-        Este gráfico exibe a distribuição central de 50% dos dados (IQR) no retângulo azul. 
-        As hastes representam os limites de normalidade ({fence_lo:+.2f} a {fence_hi:+.2f}). 
-        Pontos fora desses limites são <b>outliers estatísticos</b> ({n_out} identificados), 
-        destacados em vermelho, que indicam fontes que se desviam significativamente do comportamento esperado.
+    <p style='margin:0 0 0.75rem; color:{_BODY}; font-size:{_T_SM}; line-height:1.5;'>
+        O <strong>Boxplot</strong> (ou diagrama de caixa) exibe a distribuição central de dados através de quartis. O retângulo azul representa o <strong>Intervalo Interquartil (IQR = Q3 - Q1)</strong>, contendo os 50% centrais dos desvios.
     </p>
-    <div style='display:flex; gap:1.5rem; font-family:{_MONO}; font-size:{_T_XS}; color:{_MUTED};'>
-        <span>Q1: <strong>{q1:+.2f}</strong></span>
-        <span>Mediana: <strong>{q2:+.2f}</strong></span>
-        <span>Q3: <strong>{q3:+.2f}</strong></span>
-        <span>IQR: <strong>{iqr:.2f}</strong></span>
+    <p style='margin:0 0 0.5rem; color:{_BODY}; font-size:{_T_SM}; line-height:1.5;'>
+        As hastes (bigodes) estendem-se até aos valores reais mais extremos dentro dos limites de normalidade. As fórmulas para os limites teóricos são:
+    </p>
+    <ul style='margin:0 0 1rem 1.5rem; color:{_BODY}; font-size:{_T_SM}; line-height:1.6;'>
+        <li><strong>Limite Inferior:</strong> <code>Q1 - 1.5 × IQR</code> ≈ <strong style='color:{_INK}'>{fence_lo:+.3f}</strong></li>
+        <li><strong>Limite Superior:</strong> <code>Q3 + 1.5 × IQR</code> ≈ <strong style='color:{_INK}'>{fence_hi:+.3f}</strong></li>
+    </ul>
+    <p style='margin:0 0 1rem; color:{_BODY}; font-size:{_T_SM}; line-height:1.5;'>
+        Valores além desses limites são considerados <strong style='color:{_NEG}'>outliers estatísticos</strong>, destacados visualmente como pontos isolados (em vermelho) no gráfico abaixo.
+    </p>
+    <div style='display:flex; flex-wrap:wrap; gap:1.5rem; font-family:{_MONO}; font-size:{_T_XS}; color:{_MUTED}; background:{_SURFACE}; padding:0.75rem; border-radius:0.5rem; border:1px solid {_BORDER_SM};'>
+        <span>Q1: <strong>{q1:+.3f}</strong></span>
+        <span>Mediana: <strong>{q2:+.3f}</strong></span>
+        <span>Q3: <strong>{q3:+.3f}</strong></span>
+        <span>IQR: <strong>{iqr:.3f}</strong></span>
     </div>
 </div>""")
 
     # 3. Gráfico
     fig = go.Figure()
-    rng = np.random.default_rng(42)
 
-    # Trace 1: Boxplot nativo posicionado no eixo central (sem os pontos, mostrando apenas a caixa e bigodes)
     fig.add_trace(go.Box(
         x=[0] * len(s),
-        y=s,
+        y=s.values,
         name="",
-        boxpoints=False, 
+        boxpoints="outliers",
+        jitter=0.4,
+        pointpos=0,
         fillcolor=_ACCENT_BG,
         line=dict(color=_ACCENT, width=1.5),
-        width=0.4,
+        width=0.3,
+        marker=dict(
+            color=_NEG,
+            size=6,
+            opacity=0.9,
+            line=dict(color="white", width=1),
+            outliercolor=_NEG,
+        ),
+        text=df["nome_fonte"].values,
+        hovertemplate="<b>%{text}</b><br>Desvio: %{y:+.3f}<extra></extra>",
         showlegend=False,
-        hovertemplate=(
-            f"<b>Resumo Estatístico</b><br>"
-            f"Q3: {q3:+.3f}<br>"
-            f"Mediana: {q2:+.3f}<br>"
-            f"Q1: {q1:+.3f}<br>"
-            f"IQR: {iqr:.3f}<br>"
-            f"Limites: [{fence_lo:+.3f}, {fence_hi:+.3f}]<extra></extra>"
-        )
     ))
-
-    # Trace 2: Pontos de Outliers em Vermelho (Jitter p/ nao sobrepor)
-    if n_out > 0:
-        fig.add_trace(go.Scatter(
-            x=rng.uniform(-0.08, 0.08, size=n_out),
-            y=df_out["diff"],
-            mode="markers",
-            marker=dict(
-                color=_NEG,
-                size=7,
-                opacity=0.9,
-                line=dict(color="white", width=1)
-            ),
-            text=df_out["nome_fonte"].values,
-            hovertemplate="<b>%{text}</b><br>Desvio (Outlier): %{y:+.3f}<extra></extra>",
-            showlegend=False,
-            hoverinfo="text+y"
-        ))
 
     # Layout
     layout = _layout_base(f"Distribuição e Dispersão ({len(s)} fontes)", 500)
     layout.update(
-        xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.5, 0.5]),
+        xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.6, 0.6]),
         yaxis=dict(title="Desvio do Ideal Tracy", gridcolor=_BORDER_SM),
         hovermode="closest"
     )
@@ -403,17 +387,10 @@ def chart_violinplot(result: AnalysisResult) -> mo.Html:
     q2       = float(np.percentile(s, 50))
     q3       = float(np.percentile(s, 75))
     iqr      = q3 - q1
-    spread   = iqr if iqr > 1e-9 else float(s.std())
-    fence_lo = q1 - 1.5 * spread
-    fence_hi = q3 + 1.5 * spread
     mean_val = float(s.mean())
     std_val  = float(s.std())
     pct_zero = int((s == 0).sum())
     n_total  = len(s)
-
-    outliers_mask = (s < fence_lo) | (s > fence_hi)
-    df_out = df[outliers_mask].copy()
-    n_out  = int(outliers_mask.sum())
 
     # Bandwidth explícito: Scott's rule aplicada ao std real
     bw = 1.06 * std_val * (n_total ** -0.2) if std_val > 1e-9 else 1.0
@@ -421,7 +398,7 @@ def chart_violinplot(result: AnalysisResult) -> mo.Html:
     concentracao_txt = (
         f"O pico central em y=0 reflete que {pct_zero}/{n_total} fontes seguem o padrão exato."
         if pct_zero > n_total * 0.3
-        else f"A distribuição apresenta variabilidade real (std={std_val:.3f}) com {n_out} outlier{'s' if n_out!=1 else ''} identificado{'s' if n_out!=1 else ''}."
+        else f"A distribuição apresenta variabilidade real (std={std_val:.3f})."
     )
 
     explicacao = mo.md(f"""
@@ -438,7 +415,7 @@ def chart_violinplot(result: AnalysisResult) -> mo.Html:
     <p style='margin:0 0 .5rem;font-size:{_T_SM};color:{_BODY};line-height:1.6'>
         O violin combina a <strong>KDE (kernel density estimation)</strong> com boxplot
         interno. A largura em cada ponto indica frequência de fontes com aquele desvio.
-        {concentracao_txt} Os outliers ({n_out}) são destacados em vermelho, mantendo consistência visual com o boxplot.
+        {concentracao_txt} Os outliers são destacados em vermelho, mantendo consistência visual com o boxplot.
     </p>
     <div style='display:flex;flex-wrap:wrap;gap:.5rem;font-size:{_T_XS};
         font-family:{_MONO};color:{_MUTED}'>
@@ -449,62 +426,44 @@ def chart_violinplot(result: AnalysisResult) -> mo.Html:
         <span>IQR = <strong style='color:{_INK}'>{iqr:.3f}</strong></span>
         <span>·</span>
         <span>bw = <strong style='color:{_INK}'>{bw:.3f}</strong></span>
-        <span>·</span>
-        <span>Outliers = <strong style='color:{_NEG}'>{n_out}/{n_total}</strong></span>
     </div>
 </div>""")
 
     # ── Gráfico ───────────────────────────────────────
     fig = go.Figure()
-    rng = np.random.default_rng(42)
 
-    # Trace 1: Violin nativo posicionado no eixo central (sem outliers nativos para usar o custom)
+    # Trace 1: Violin nativo posicionado no eixo central
     fig.add_trace(go.Violin(
         x=[0] * len(s),
         y=s.values,
         box_visible=True,
         meanline_visible=True,
-        points=False, # Removido para usar o scatter e manter a consistência visual com o boxplot
+        points="outliers",
+        jitter=0.4,
+        pointpos=0,
         bandwidth=bw,
         line_color=_ACCENT,
         fillcolor=_ACCENT_BG,
         opacity=0.85,
+        width=0.6,
+        marker=dict(
+            color=_NEG,
+            size=6,
+            opacity=0.9,
+            line=dict(color="white", width=1),
+            outliercolor=_NEG,
+        ),
         box=dict(
             visible=True,
             fillcolor=_ACCENT,
             line=dict(color=_ACCENT, width=1.5),
         ),
         meanline=dict(visible=True, color=_WARN, width=2),
-        hovertemplate=(
-            f"<b>Resumo Densidade</b><br>"
-            f"Média: {mean_val:+.3f}<br>"
-            f"Q3: {q3:+.3f}<br>"
-            f"Mediana: {q2:+.3f}<br>"
-            f"Q1: {q1:+.3f}<br>"
-            f"IQR: {iqr:.3f}<br>"
-            f"Limites: [{fence_lo:+.3f}, {fence_hi:+.3f}]<extra></extra>"
-        ),
+        text=df["nome_fonte"].values,
+        hovertemplate="<b>%{text}</b><br>Desvio: %{y:+.3f}<extra></extra>",
         showlegend=False,
         name="",
     ))
-
-    # Trace 2: Pontos de Outliers em Vermelho (Jitter) para alinhar visualmente com o Boxplot
-    if n_out > 0:
-        fig.add_trace(go.Scatter(
-            x=rng.uniform(-0.08, 0.08, size=n_out),
-            y=df_out["diff"],
-            mode="markers",
-            marker=dict(
-                color=_NEG,
-                size=7,
-                opacity=0.9,
-                line=dict(color="white", width=1)
-            ),
-            text=df_out["nome_fonte"].values,
-            hovertemplate="<b>%{text}</b><br>Desvio (Outlier): %{y:+.3f}<extra></extra>",
-            showlegend=False,
-            hoverinfo="text+y"
-        ))
 
     fig.add_hline(
         y=0, line_dash="longdash", line_color=_ZERO, line_width=1.5,
@@ -517,13 +476,12 @@ def chart_violinplot(result: AnalysisResult) -> mo.Html:
     layout = _layout_base("Densidade de Frequência da Base de Dados Tipográfica", 520)
     layout.update(
         yaxis=_axis_y("Desvio em relação ao padrão Tracy"),
-        xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.5, 0.5]),
+        xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[-0.8, 0.8]),
         showlegend=False,
         hovermode="closest"
     )
     fig.update_layout(**layout)
 
-    # Removida a tabela de auditoria conforme solicitado, para manter a tela limpa e igual ao boxplot.
     return mo.vstack([explicacao, mo.as_html(fig)])
 
 
